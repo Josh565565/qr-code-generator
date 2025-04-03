@@ -6,8 +6,7 @@ import { v4 as uuidv4 } from 'uuid';
 
 @Injectable()
 export class QrCodeService {
-  private readonly movieDataUrl =
-    'https://gist.githubusercontent.com/saniyusuf/406b843afdfb9c6a86e25753fe2761f4/raw';
+  private readonly movieDataUrl = process.env.MOVIE_API_URL;
 
   constructor(private prisma: PrismaService) {}
 
@@ -31,6 +30,9 @@ export class QrCodeService {
   }
 
   private async getRandomMovies() {
+    if (!this.movieDataUrl) {
+      throw new Error('MOVIE_API_URL is not defined');
+    }
     const response = await axios.get(this.movieDataUrl);
     const movies = response.data;
     return movies.sort(() => 0.5 - Math.random()).slice(0, 10);
