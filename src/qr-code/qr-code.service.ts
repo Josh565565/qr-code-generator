@@ -12,23 +12,22 @@ export class QrCodeService {
   constructor(private prisma: PrismaService) {}
 
   async generateQRCode() {
-    const movies = await this.getRandomMovies();
-
     const token = uuidv4();
+    const url = `https://qr-code-generator-frontend-cyan.vercel.app/movies/${token}`;
 
     await this.prisma.qrCode.create({
-      data: { token, movies },
+      data: { token },
     });
 
-    const url = `http://localhost:3000/movies/${token}`;
     const qrCode = await QRCode.toDataURL(url);
-
     return { qrCode, url };
   }
 
   async getMoviesByToken(token: string) {
     const record = await this.prisma.qrCode.findUnique({ where: { token } });
-    return record ? record.movies : [];
+    if (!record) return [];
+
+    return this.getRandomMovies();
   }
 
   private async getRandomMovies() {
